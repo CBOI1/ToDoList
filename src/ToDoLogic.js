@@ -1,5 +1,4 @@
 
-
 class ToDo {
     #title;
     #description;
@@ -7,14 +6,11 @@ class ToDo {
     #priority;
     #id;
     #projectId;
-    constructor(title, description, priority, idData) {
+    constructor(title, description, priority, id) {
         this.#title = title;
         this.#description = description;
         this.#priority = priority;
-        [this.#id, this.#projectId] = idData;
-    }
-    getIdData() {
-        return [this.#id, this.#projectId];
+        this.#id
     }
     getId() {
         return this.#id;
@@ -50,7 +46,7 @@ class Project {
     }
 
     addToDo(title, description, priority) {
-        let newToDo = new ToDo(title, description, priority, [this.#counter++, this.#id]);
+        let newToDo = new ToDo(title, description, priority, this.#counter++);
         this.#toDoList.push(newToDo)
     }
 
@@ -77,9 +73,10 @@ class ToDoManager {
         const projectID = this.#counter++;
         const newProject = new Project(name, projectID);
         this.#projects.push(newProject);
+        return newProject;
     }
     removeProject(id) {
-        //Projects ID's are in strictly increasing order
+        //#projects ID's are in strictly increasing order
         //use binary search
         const indexToRemove = Finder.binSearch(this.#projects, id, (project) => project.getId());
         if (indexToRemove === -1) {
@@ -93,10 +90,9 @@ class ToDoManager {
     getProjects() {
         return this.#projects;
     }
-    getToDo(idData) {
-        const [projectId, toDoId] = idData;
-        const project = this.getProject(projectId);
-        return project === null ? null : project.getToDo(toDoId);
+    getToDo(pid, tid) {
+        const project = this.getProject(pid);
+        return project === null ? null : project.getToDo(tid);
     }
 
     getProject(projectId) {
@@ -107,24 +103,40 @@ class ToDoManager {
 
 class ToDoApp {
     #toDoManager;
+    
     constructor() {
         this.#toDoManager = new ToDoManager();
     }
 
-    getProjects() {
-        return this.#toDoManager.getProjects().map((p) => ({name: p.getName(), pid : p.getId()}));
+    #projectUI(p) {
+        return {name: p.getName(), pid : p.getId()};
     }
-    getToDos(projectId) {
-        const project = this.#toDoManager.getProject(projectId);
-        if (project === null) {
-            return null
-        } else {
-            return project.getToDos().map((toDo) => ({
-                idData : toDo.getIdData(), 
-                title : toDo.getTitle(),
-                description : toDo.getDescription()
-            }));
+    #toDoUI(toDo) {
+        return {
+            id: toDo.getId(),
+            title: toDo.getTitle(),
+            description: toDo.getDescription()
+        };
+    }
+    getProjects() {
+        return this.#toDoManager.getProjects().map(this.#projectUI);
+    }
+    addToDo(pid, toDo) {
+        const project = this.#toDoManager.getProject(pid);
+        if (project !== null) {
+            project.addToDo(toDo);
         }
+    }
+    addProject(name) {
+        const project = this.#toDoManager.addProject(name);
+        return this.#projectUI(project);
+    }
+    getToDos(pid) {
+        const project = this.#toDoManager.getProject(pid);
+        if (project !== null) {
+            return project.getToDos().map((t) => this.#toDoUI(t));
+        }
+        return null;
     }
 }
 

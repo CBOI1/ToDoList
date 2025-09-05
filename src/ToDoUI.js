@@ -11,7 +11,10 @@ class ToDoUI {
 
     #clearContent() {
         const content = this.#doc.querySelector(".content");
-        content.innerHTML = "";
+        const header = this.#doc.querySelector("header");
+        delete header.dataset.pid;
+        this.#doc.body.innerHtml = "";
+        this.#doc.body.append(header, content);
     }
 
     showProjects() {
@@ -21,28 +24,55 @@ class ToDoUI {
         const content = this.#doc.querySelector("div.content");
         const scrollContent = this.#doc.createElement("div");
         scrollContent.classList.add("scroll-content");
-        scrollContent.appendChild(this.#createProjectList());
+        scrollContent.appendChild(this.#createList(
+            this.#toDoApp.getProjects(),
+            this.#addProject
+        ));
         content.append(scrollContent);
 
         content.parentNode.insertBefore(form, content);
     }
     //creates and returns ul containing list of projects
-    #createProjectList() {
-        const projects = this.#toDoApp.getProjects();
+    #createList(elements, addElement) {
         const unorderedList = this.#doc.createElement("ul");
-        for (const project of projects) {
-            this.#addProject(unorderedList, project);
+        for (const element of elements) {
+            addElement(this, unorderedList, element);
         }
         return unorderedList;
     }
-    #addProject(list, project) {
-        const projectNode = this.#doc.createElement("button");
-        const li = this.#doc.createElement("li");
+    //add project to list of projects in UI and Logic
+    #addProject(obj, list, project) {
+        const projectNode = obj.#doc.createElement("button");
+        const li = obj.#doc.createElement("li");
         li.appendChild(projectNode);
         const {name, pid} = project;
         projectNode.textContent = name;
         projectNode.dataset.id = pid;
         list.append(li);
+    }
+    #addToDo(obj, list, toDo) {
+        const toDoNode = obj.#doc.createElement("button");
+        const li = obj.#doc.createElement("li");
+        const {id, title, description} = toDo;
+        toDoNode.textContent = title;
+        toDoNode.dataset.id = id;
+        toDoNode.dataset.description = description;
+        toDoNode.addEventListener("click", () => {
+
+        });
+        li.appendChild(toDoNode);
+        list.appendChild(li);
+    }
+
+    #showToDos(pid) {
+        this.#clearContent();
+        const content = this.#doc.querySelector(".content");
+        const toDos = this.#toDoApp.getToDos(pid);
+        //store pid on page to be able to get a reference to project
+        const header = this.#doc.querySelector("header");
+        header.dataset.pid = pid;
+        //create list of toDos
+        content.appendChild(this.#createList(toDos, this.#addToDo));
     }
 
     #createProjectInputForm() {
@@ -61,7 +91,7 @@ class ToDoUI {
             }
             const list = this.#doc.querySelector("ul");
             const project = this.#toDoApp.addProject(userInput.value);
-            this.#addProject(list, project);
+            this.#addProject(this, list, project);
             userInput.value = "";
         });
         form.append(nameInput, submitButton);
@@ -70,6 +100,8 @@ class ToDoUI {
         return form;
     }
 }
+
+
 
 function setUpWebpage() {
     document.addEventListener("DOMContentLoaded", (e) => {
