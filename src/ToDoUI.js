@@ -13,7 +13,9 @@ class ToDoUI {
         const content = this.#doc.querySelector(".content");
         const header = this.#doc.querySelector("header");
         delete header.dataset.pid;
-        this.#doc.body.innerHtml = "";
+        content.innerHTML = "";
+        console.log(content.childNodes);
+        this.#doc.body.innerHTML = "";
         this.#doc.body.append(header, content);
     }
 
@@ -32,33 +34,46 @@ class ToDoUI {
 
         content.parentNode.insertBefore(form, content);
     }
-    //creates and returns ul containing list of projects
+    //creates and returns ul containing list of provided elements
     #createList(elements, addElement) {
         const unorderedList = this.#doc.createElement("ul");
         for (const element of elements) {
-            addElement(this, unorderedList, element);
+            addElement(element);
         }
         return unorderedList;
     }
-    //add project to list of projects in UI and Logic
-    #addProject(obj, list, project) {
-        const projectNode = obj.#doc.createElement("button");
-        const li = obj.#doc.createElement("li");
+    //add project to list of projects in UI and model
+    #addProject = (projectName) => {
+        //add to model
+        const project = this.#toDoApp.addProject(projectName);
+        //add to UI
+        const list = this.#doc.querySelector("ul");
+        const projectNode = this.#doc.createElement("button");
+        const li = this.#doc.createElement("li");
         li.appendChild(projectNode);
         const {name, pid} = project;
         projectNode.textContent = name;
         projectNode.dataset.id = pid;
-        list.append(li);
+        list.appendChild(li);
+        projectNode.addEventListener("click", (event) => {
+            const pid = event.currentTarget.dataset.id;
+            this.#clearContent();
+        });
+        
+
     }
-    #addToDo(obj, list, toDo) {
-        const toDoNode = obj.#doc.createElement("button");
-        const li = obj.#doc.createElement("li");
+    //add to UI and model
+    #addToDo = (toDo) => {
+        const list = this.#doc.querySelector("ul");
+        const toDoNode = this.#doc.createElement("button");
+        const li = this.#doc.createElement("li");
         const {id, title, description} = toDo;
         toDoNode.textContent = title;
         toDoNode.dataset.id = id;
         toDoNode.dataset.description = description;
         toDoNode.addEventListener("click", () => {
-
+            //TODO: expand toDo and show details
+            return;
         });
         li.appendChild(toDoNode);
         list.appendChild(li);
@@ -79,19 +94,18 @@ class ToDoUI {
         const form = this.#doc.createElement("form");
         const nameInput = this.#doc.createElement("input");
         nameInput.setAttribute("type", "text");
-        nameInput.setAttribute("placeholder", "Project Name")
+        nameInput.setAttribute("placeholder", "Project Name");
 
         const submitButton = this.#doc.createElement("button");
         submitButton.setAttribute("type", "button");
-        submitButton.textContent = "button";
+        submitButton.textContent = "+";
         submitButton.addEventListener("click", () => {
             const userInput = this.#doc.querySelector("form input");
             if (userInput.value === "") {
                 return;
             }
             const list = this.#doc.querySelector("ul");
-            const project = this.#toDoApp.addProject(userInput.value);
-            this.#addProject(this, list, project);
+            this.#addProject(userInput.value);
             userInput.value = "";
         });
         form.append(nameInput, submitButton);

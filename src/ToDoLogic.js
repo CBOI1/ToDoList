@@ -10,7 +10,7 @@ class ToDo {
         this.#title = title;
         this.#description = description;
         this.#priority = priority;
-        this.#id
+        this.#id = id;
     }
     getId() {
         return this.#id;
@@ -37,7 +37,7 @@ class Project {
     }
 
     getToDo(id) {
-        const toDoIndex = Finder.binSearch(this.#toDoList, id, (toDo) => toDo.getId())
+        const toDoIndex = Finder.binSearch(this.#toDoList, id)
         return (toDoIndex === -1) ? null : this.#toDoList[toDoIndex];
     }
 
@@ -66,8 +66,6 @@ class ToDoManager {
     constructor() {
         this.#counter = 0
         this.#projects = new Array();
-        this.addProject("Default Project");
-        this.#projects[0].addToDo("Default ToDo");
     }
     addProject(name) {
         const projectID = this.#counter++;
@@ -78,7 +76,7 @@ class ToDoManager {
     removeProject(id) {
         //#projects ID's are in strictly increasing order
         //use binary search
-        const indexToRemove = Finder.binSearch(this.#projects, id, (project) => project.getId());
+        const indexToRemove = Finder.binSearch(this.#projects, id);
         if (indexToRemove === -1) {
             return false
         } else {
@@ -96,7 +94,7 @@ class ToDoManager {
     }
 
     getProject(projectId) {
-        const projectIndex = Finder.binSearch(this.#projects, projectId, (p) => p.getId())
+        const projectIndex = Finder.binSearch(this.#projects, projectId)
         return projectIndex === -1 ? null : this.#projects[projectIndex];
     }
 }
@@ -121,16 +119,24 @@ class ToDoApp {
     getProjects() {
         return this.#toDoManager.getProjects().map(this.#projectUI);
     }
+    getProject(pid) {
+        const project = this.#toDoManager.getProject();
+        if (project === null) {
+            return null
+        }
+        return this.#projectUI(project);
+    }
+     addProject(name) {
+        const project = this.#toDoManager.addProject(name);
+        return this.#projectUI(project);
+    }
     addToDo(pid, toDo) {
         const project = this.#toDoManager.getProject(pid);
         if (project !== null) {
             project.addToDo(toDo);
         }
     }
-    addProject(name) {
-        const project = this.#toDoManager.addProject(name);
-        return this.#projectUI(project);
-    }
+   
     getToDos(pid) {
         const project = this.#toDoManager.getProject(pid);
         if (project !== null) {
@@ -141,15 +147,16 @@ class ToDoApp {
 }
 
 class Finder {
-    static binSearch(arr, targetValue, getTargetValue) {
+    static binSearch(arr, targetValue) {
         let left = 0;
         let right = arr.length - 1;
         
         while (left <= right) {
-            let mid = Math.floor((left + right) / 2);
-            if (getTargetValue(arr[mid]) == targetValue) {
+            const mid = Math.floor((left + right) / 2);
+            const currVal = arr[mid].getId();
+            if (currVal === targetValue) {
                 return mid;
-            } else if (getTargetValue(arr[mid]) < targetValue) {
+            } else if (currVal < targetValue) {
                 left = mid + 1
             } else {
                 right = mid - 1
