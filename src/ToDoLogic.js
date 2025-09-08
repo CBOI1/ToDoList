@@ -70,6 +70,7 @@ class ToDoManager {
     addProject(name) {
         const projectID = this.#counter++;
         const newProject = new Project(name, projectID);
+        newProject.addToDo("Something", "For testing", 0);
         this.#projects.push(newProject);
         return newProject;
     }
@@ -142,7 +143,7 @@ class ToDoApp {
         if (project !== null) {
             return project.getToDos().map((t) => this.#toDoUI(t));
         }
-        return null;
+        return [];
     }
 }
 
