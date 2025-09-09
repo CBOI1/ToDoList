@@ -7,7 +7,6 @@ class ToDoUI {
     constructor(doc) {
         this.#toDoApp = new ToDoApp();
         this.#doc = doc;
-        this.#toDoApp.addProject("Hello World");
     }
 
     #clearContent() {
@@ -75,12 +74,13 @@ class ToDoUI {
         this.#clearContent();
         const content = this.#doc.querySelector(".content");
         const ul = this.#doc.createElement("ul");
+        content.appendChild(ul);
         const toDos = this.#toDoApp.getToDos(pid);
         //store pid on page to be able to get a reference to project
         const header = this.#doc.querySelector("header");
         header.dataset.pid = pid;
         //create list of toDos
-        ul.appendChild();
+        this.#addElements(this.#toDoApp.getToDos(pid), this.#addToDo);
         content.appendChild(ul);
     }
 
