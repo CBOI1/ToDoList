@@ -50,7 +50,7 @@ class ToDoUI {
         projectNode.addEventListener("click", (event) => {
             const pid = parseInt(event.currentTarget.dataset.id);
             //diplay list of project's ToDo's
-            this.#showToDos(pid);
+            this.#displayProject(pid);
         });
     }
     //add toDo to the UI
@@ -71,17 +71,32 @@ class ToDoUI {
     }
     //show all ToDo's for associated PID that exist in model
     #showToDos(pid) {
-        this.#clearContent();
         const content = this.#doc.querySelector(".content");
         const ul = this.#doc.createElement("ul");
         content.appendChild(ul);
-        const toDos = this.#toDoApp.getToDos(pid);
         //store pid on page to be able to get a reference to project
         const header = this.#doc.querySelector("header");
         header.dataset.pid = pid;
         //create list of toDos
         this.#addElements(this.#toDoApp.getToDos(pid), this.#addToDo);
         content.appendChild(ul);
+    }
+
+    #displayProject(pid) {
+        this.#clearContent();
+        const container = this.#doc.createElement("div");
+        container.classList.add("header-container");
+        const header = this.#doc.querySelector("header");
+        header.parentNode.insertBefore(container, header.nextSibling);
+        container.appendChild(header);
+        const exitButton = this.#doc.createElement("button");
+        exitButton.setAttribute("type", "button");
+        exitButton.textContent = "x";
+        exitButton.addEventListener("click", () => {
+            this.showProjects();
+        });
+        container.appendChild(exitButton);
+        this.#showToDos(pid);
     }
 
     #createProjectInputForm() {
