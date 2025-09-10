@@ -81,7 +81,7 @@ class ToDoUI {
         this.#addElements(this.#toDoApp.getToDos(pid), this.#addToDo);
         content.appendChild(ul);
     }
-
+    //creates UI to display a specfic project's content and other UI elements
     #displayProject(pid) {
         this.#clearContent();
         const container = this.#doc.createElement("div");
@@ -119,10 +119,50 @@ class ToDoUI {
             userInput.value = "";
         });
         form.append(nameInput, submitButton);
-
-
         return form;
     }
+
+    #createInputDialog() {
+        const dialog = this.#doc.createElement("dialog");
+        const form = this.#doc.createElement("form");
+        const nameDiv = this.#createLabeledInput("text", "name", "Name: ");
+        const priorityDiv = this.#createLabeledInput("range", "priority", "Priority: ");
+        const priorityInput = priorityDiv.querySelector("input");
+        priorityInput.setAttribute("min", "1");
+        priorityInput.setAttribute("max", "10");
+        const textareaDiv = this.#createLabeledInput("textarea", "description", "Description: ");
+        form.append(nameDiv, priorityDiv, textareaDiv);
+        dialog.appendChild(form);
+        return dialog;
+    }
+
+    
+    //either returns an input with specific type
+    #createInputElement(typeOfInput, id) {
+        let input; 
+        if (typeOfInput === "textarea" || typeOfInput === "button") {
+            input = this.#doc.createElement(typeOfInput);
+        } else {
+            input = this.#doc.createElement("input");
+            input.setAttribute("type", typeOfInput);
+        }
+        input.setAttribute("id", id);
+        return input;
+    }
+    #createLabelFor(inputElement, content) {
+        const label = this.#doc.createElement("label");
+        label.setAttribute("for", inputElement.id);
+        label.textContent = content;
+        return label;
+    }
+    #createLabeledInput(typeOfInput, id, label) {
+        const input = this.#createInputElement(typeOfInput, id);
+        const label = this.#createLabelFor(input, label);
+        const div = this.#doc.createElement("div");
+        div.append(label, input);
+        return div;
+    }
+
 }
 
 
