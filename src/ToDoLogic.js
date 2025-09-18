@@ -1,11 +1,12 @@
 
+
 class ToDo {
     #title;
     #description;
     #dueDate;
     #priority;
     #id;
-    #projectId;
+
     constructor(title, description, priority, id) {
         this.#title = title;
         this.#description = description;
@@ -20,6 +21,18 @@ class ToDo {
     }
     getDescription() {
         return this.#description;
+    }
+    getPriority() {
+        return this.#priority;
+    }
+    updateTitle(title) {
+        this.#title = title;
+    }
+    updatePriority(priority) {
+        this.#priority = priority;
+    }
+    updateDescription(description) {
+        this.#description = description;
     }
 
 }
@@ -48,6 +61,7 @@ class Project {
     addToDo(title, description, priority) {
         let newToDo = new ToDo(title, description, priority, this.#counter++);
         this.#toDoList.push(newToDo)
+        return newToDo;
     }
 
     getName() {
@@ -89,6 +103,13 @@ class ToDoManager {
     getProjects() {
         return this.#projects;
     }
+    addToDo(pid, title, description, priority) {
+        const project = this.getProject(pid);
+        if (project !== null) {
+            return project.addToDo(title, description, priority);
+        }
+        return null
+    }
     getToDo(pid, tid) {
         const project = this.getProject(pid);
         return project === null ? null : project.getToDo(tid);
@@ -97,6 +118,24 @@ class ToDoManager {
     getProject(projectId) {
         const projectIndex = Finder.binSearch(this.#projects, projectId)
         return projectIndex === -1 ? null : this.#projects[projectIndex];
+    }
+    updateTitle(pid, tid, title) {
+        const toDo = this.getToDo(pid, tid);
+        if (toDo !== null) {
+            toDo.updateTitle(title);
+        }
+    }
+    updatePriortiy(pid, tid, priority) {
+        const toDo = this.getToDo(pid, tid);
+        if (toDo !== null) {
+            toDo.updatePriority(priority);
+        }
+    }
+    updateDescription(pid, tid, description) {
+        const toDo = this.getToDo(pid, tid);
+        if (toDo !== null) {
+            toDo.updateDescription(description);
+        }
     }
 }
 
@@ -114,14 +153,15 @@ class ToDoApp {
         return {
             id: toDo.getId(),
             title: toDo.getTitle(),
-            description: toDo.getDescription()
+            description: toDo.getDescription(),
+            priority: toDo.getPriority()
         };
     }
     getProjects() {
         return this.#toDoManager.getProjects().map(this.#projectUI);
     }
     getProject(pid) {
-        const project = this.#toDoManager.getProject();
+        const project = this.#toDoManager.getProject(pid);
         if (project === null) {
             return null
         }
@@ -131,11 +171,10 @@ class ToDoApp {
         const project = this.#toDoManager.addProject(name);
         return this.#projectUI(project);
     }
-    addToDo(pid, toDo) {
-        const project = this.#toDoManager.getProject(pid);
-        if (project !== null) {
-            project.addToDo(toDo);
-        }
+    //Not sure what UI sends here
+    addToDo(pid, title, description, priority) {
+        const toDo = this.#toDoManager.addToDo(pid, title, description, priority);
+        return this.#toDoUI(toDo);
     }
    
     getToDos(pid) {
@@ -143,8 +182,25 @@ class ToDoApp {
         if (project !== null) {
             return project.getToDos().map((t) => this.#toDoUI(t));
         }
-        return [];
+        return null;
     }
+    getToDo(pid, tid) {
+        const toDo = this.#toDoManager.getToDo(pid, tid);
+        if (toDo !== null) {
+            return this.#toDoUI(toDo)
+        }
+        return null;
+    }
+    updatePriority(pid, tid, priority) {
+        this.#toDoManager.updatePriortiy(pid, tid, priority);
+    }
+    updateTitle(pid, tid, title) {
+        this.#toDoManager.updateTitle(pid, tid, title);
+    }
+    updateDescription(pid, tid, description) {
+        this.#toDoManager.updateDescription(pid, tid, description);
+    }
+    
 }
 
 class Finder {
