@@ -1,5 +1,6 @@
 import "./styles.css";
 import ToDoApp from "./ToDoLogic.js"
+import trashIcon from "../trash-icons/icons8-trash-26.svg"
 //http://localhost:8080/
 class ToDoUI {
     #toDoApp;
@@ -8,7 +9,20 @@ class ToDoUI {
         this.#toDoApp = new ToDoApp();
         this.#doc = doc;
     }
-
+    #createTrashIcon(tid) {
+        const deleteButton = this.#doc.createElement("button");
+        const icon = this.#doc.createElement("img")
+        deleteButton.dataset.tid = tid;
+        deleteButton.classList.add("delete-button");
+        icon.setAttribute("src", trashIcon);
+        deleteButton.appendChild(icon);
+        deleteButton.addEventListener("click", (e) => {
+            const tid = parseInt(e.currentTarget.dataset.tid);
+            //remove toDo from UI and logic
+            this.#removeToDo(tid);
+        })
+        return deleteButton;
+    }
     #clearContent() {
         const content = this.#doc.querySelector(".content");
         const header = this.#doc.querySelector("header");
@@ -57,19 +71,27 @@ class ToDoUI {
         const list = this.#doc.querySelector("ul");
         const toDoNode = this.#doc.createElement("button");
         const li = this.#doc.createElement("li");
-        const {id, title, description, priority} = toDo;
-        toDoNode.dataset.tid = id;
+        const {id : tid, title} = toDo;
+        toDoNode.dataset.tid = tid;
+        toDoNode.classList.add("todo-button");
         toDoNode.textContent = title;
         toDoNode.addEventListener("click", () => {
             //expand toDo and show details
             //TODO: need to change this I believe not sure
             const dialog = this.#doc.querySelector("dialog");
-            dialog.dataset.tid = id;
-            this.#fillDialog(id)
+            dialog.dataset.tid = tid;
+            this.#fillDialog(tid)
             dialog.showModal();
         });
-        li.appendChild(toDoNode);
+        li.append(this.#createTrashIcon(tid), toDoNode);
         list.appendChild(li);
+    }
+    #removeToDo(tid) {
+        const pid = parseInt(this.#doc.querySelector("header").dataset.pid);
+        const ul = this.#doc.querySelector("ul");
+        const listItem = ul.querySelector(`li > button[data-tid="${tid}"][class="delete-button"]`).parentNode;
+        listItem.remove();
+        this.#toDoApp.removeToDo(pid, tid);
     }
     //show all ToDo's for associated PID that exist in model
     #showToDos(pid) {
@@ -172,7 +194,7 @@ class ToDoUI {
         textArea.value = toDo.description;
     }
 
-    #confirmCallBack = (event) => {
+    #confirmCallBack = () => {
         const dialog = this.#doc.querySelector("dialog");
         const header = this.#doc.querySelector("header");
         const tid = parseInt(dialog.dataset.tid);
@@ -185,7 +207,7 @@ class ToDoUI {
             this.#toDoApp.updateDescription(pid, tid, description.value);
             this.#toDoApp.updateTitle(pid, tid, title.value);
             this.#toDoApp.updatePriority(pid, tid, priority.value);
-            const toDoButton = this.#doc.querySelector(`button[data-tid="${tid}"]`);
+            const toDoButton = this.#doc.querySelector(`button[class="todo-button"][data-tid="${tid}"]`);
             toDoButton.textContent = title.value;
         } else {
             const toDo = this.#toDoApp.addToDo(pid, title.value, description.value, priority.value);

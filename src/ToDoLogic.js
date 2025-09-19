@@ -63,6 +63,13 @@ class Project {
         this.#toDoList.push(newToDo)
         return newToDo;
     }
+    removeToDo(tid) {
+        const index = Finder.binSearch(this.#toDoList, tid)
+        if (index !== -1) {
+            this.#toDoList.splice(index, 1)
+        }
+
+    }
 
     getName() {
         return this.#name;
@@ -109,6 +116,13 @@ class ToDoManager {
             return project.addToDo(title, description, priority);
         }
         return null
+    }
+    removeToDo(pid, tid) {
+        const project = this.getProject(pid);
+        if (project !== null) {
+            return project.removeToDo(tid);
+        }
+        project.removeToDo(tid);
     }
     getToDo(pid, tid) {
         const project = this.getProject(pid);
@@ -175,6 +189,9 @@ class ToDoApp {
     addToDo(pid, title, description, priority) {
         const toDo = this.#toDoManager.addToDo(pid, title, description, priority);
         return this.#toDoUI(toDo);
+    }
+    removeToDo(pid, tid) {
+        this.#toDoManager.removeToDo(pid, tid);
     }
    
     getToDos(pid) {
