@@ -6,12 +6,14 @@ class ToDo {
     #dueDate;
     #priority;
     #id;
+    #checklist;
 
     constructor(title, description, priority, id) {
         this.#title = title;
         this.#description = description;
         this.#priority = priority;
         this.#id = id;
+        this.#checklist = new Set();
     }
     getId() {
         return this.#id;
@@ -34,6 +36,15 @@ class ToDo {
     updateDescription(description) {
         this.#description = description;
     }
+    addToChecklist(item) {
+        this.#checklist.add(item);
+    }
+    removeFromChecklist(item) {
+        this.#checklist.delete(item);
+    }
+    getChecklist() {
+        return Array.from(this.#checklist);
+    }
 
 }
 
@@ -49,9 +60,28 @@ class Project {
         this.#counter = 0;
     }
 
-    getToDo(id) {
-        const toDoIndex = Finder.binSearch(this.#toDoList, id)
+    getToDo(tid) {
+        const toDoIndex = Finder.binSearch(this.#toDoList, tid)
         return (toDoIndex === -1) ? null : this.#toDoList[toDoIndex];
+    }
+
+    getChecklisk(tid) {
+        const toDoIndex = Finder.binSearch(this.#toDoList, tid);
+        return toDoIndex === -1 ? null : this.#toDoList[toDoIndex].getChecklist();
+    }
+
+    addToChecklist(tid, item) {
+        const toDoIndex = Finder.binSearch(this.#toDoList, tid);
+        if (toDoIndex !== -1) {
+            this.#toDoList[toDoIndex].addToChecklist(item);
+        }
+    }
+
+    removeFromChecklist(tid, item) {
+        const toDoIndex = Finder.binSearch(this.#toDoList, tid);
+        if (toDoIndex !== -1) {
+            this.#toDoList[toDoIndex].removeFromChecklist(item);
+        }
     }
 
     getToDos() {
@@ -68,7 +98,6 @@ class Project {
         if (index !== -1) {
             this.#toDoList.splice(index, 1)
         }
-
     }
 
     getName() {
@@ -151,6 +180,18 @@ class ToDoManager {
             toDo.updateDescription(description);
         }
     }
+    addToChecklist(pid, tid, item) {
+        const project = this.getProject(pid);
+        if (project !== null) {
+            project.addToChecklist(tid, item);
+        }
+    }
+    removeFromChecklist(pid, tid, item) {
+        const project = this.getProject(pid);
+        if (project !== null) {
+            project.removeFromChecklist(tid, item);
+        }
+    }
 }
 
 class ToDoApp {
@@ -216,6 +257,12 @@ class ToDoApp {
     }
     updateDescription(pid, tid, description) {
         this.#toDoManager.updateDescription(pid, tid, description);
+    }
+    addToChecklist(pid, tid, item) {
+        this.#toDoManager.addToChecklist(pid, tid, item);
+    }
+    removeFromChecklist(pid, tid, item) {
+        this.#toDoManager.removeFromChecklist(pid, tid, item);
     }
     
 }

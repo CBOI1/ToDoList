@@ -1,6 +1,7 @@
 import "./styles.css";
 import ToDoApp from "./ToDoLogic.js"
 import trashIcon from "../trash-icons/icons8-trash-26.svg"
+import {format} from "date-fns";
 //http://localhost:8080/
 class ToDoUI {
     #toDoApp;
@@ -176,7 +177,8 @@ class ToDoUI {
         const confirmDiv = this.#doc.createElement("div")
         confirmDiv.appendChild(confirm);
         confirm.textContent = "confirm";
-        form.append(nameDiv, priorityDiv, textareaDiv, confirmDiv);
+        const datePicker = this.#createLabeledInput("date", "date", "Complete By:");
+        form.append(nameDiv, priorityDiv, textareaDiv, datePicker, confirmDiv);
         dialog.appendChild(form);
         return dialog;
     }
@@ -203,10 +205,12 @@ class ToDoUI {
         const title = this.#doc.querySelector('input[id="title"]');
         const priority = this.#doc.querySelector('input[id="priority"]');
         const description = this.#doc.querySelector('textarea[id=description]');
+        const date = this.#doc.querySelector(`input[id="date"]`);
         if (tid >= 0) {
             this.#toDoApp.updateDescription(pid, tid, description.value);
             this.#toDoApp.updateTitle(pid, tid, title.value);
             this.#toDoApp.updatePriority(pid, tid, priority.value);
+            this.#toDoApp.updateDate(pid, tid, date.value);
             const toDoButton = this.#doc.querySelector(`button[class="todo-button"][data-tid="${tid}"]`);
             toDoButton.textContent = title.value;
         } else {
