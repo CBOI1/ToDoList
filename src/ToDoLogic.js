@@ -1,4 +1,4 @@
-
+import {format} from "date-fns";
 
 class ToDo {
     #title;
@@ -14,6 +14,7 @@ class ToDo {
         this.#priority = priority;
         this.#id = id;
         this.#checklist = new Set();
+        this.#dueDate = new Date();
     }
     getId() {
         return this.#id;
@@ -26,6 +27,12 @@ class ToDo {
     }
     getPriority() {
         return this.#priority;
+    }
+    getDate() {
+        return this.#dueDate;
+    }
+    updateDate(date) {
+        this.#dueDate = date;
     }
     updateTitle(title) {
         this.#title = title;
@@ -180,6 +187,12 @@ class ToDoManager {
             toDo.updateDescription(description);
         }
     }
+    updateDate(pid, tid, date) {
+        const toDo = this.getToDo(pid, tid);
+        if (toDo !== null) {
+            toDo.updateDate(date);
+        }
+    }
     addToChecklist(pid, tid, item) {
         const project = this.getProject(pid);
         if (project !== null) {
@@ -205,11 +218,15 @@ class ToDoApp {
         return {name: p.getName(), pid : p.getId()};
     }
     #toDoUI(toDo) {
+        const date = toDo.getDate();
+        const month = (date.getMonth() + 1).toString();
+        const day = date.getDate().toString();
         return {
             id: toDo.getId(),
             title: toDo.getTitle(),
             description: toDo.getDescription(),
-            priority: toDo.getPriority()
+            priority: toDo.getPriority(),
+            date: `${date.getFullYear()}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
         };
     }
     getProjects() {
@@ -263,6 +280,14 @@ class ToDoApp {
     }
     removeFromChecklist(pid, tid, item) {
         this.#toDoManager.removeFromChecklist(pid, tid, item);
+    }
+    updateDate(pid, tid, dateString) {
+        const [y, m, d] = dateString.split("-").map(Number);
+        this.#toDoManager.updateDate(pid, tid, new Date(y, m - 1, d));
+    }
+    formatDate(dateStr) {
+        const [y, m, d] = dateStr.split("-").map(Number);
+        return format(new Date(y, m - 1, d), "PPP");
     }
     
 }

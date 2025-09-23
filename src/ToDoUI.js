@@ -1,7 +1,7 @@
 import "./styles.css";
 import ToDoApp from "./ToDoLogic.js"
 import trashIcon from "../trash-icons/icons8-trash-26.svg"
-import {format} from "date-fns";
+
 //http://localhost:8080/
 class ToDoUI {
     #toDoApp;
@@ -72,10 +72,10 @@ class ToDoUI {
         const list = this.#doc.querySelector("ul");
         const toDoNode = this.#doc.createElement("button");
         const li = this.#doc.createElement("li");
-        const {id : tid, title} = toDo;
+        const {id : tid, title, date} = toDo;
         toDoNode.dataset.tid = tid;
         toDoNode.classList.add("todo-button");
-        toDoNode.textContent = title;
+        toDoNode.textContent = title + " " + this.#toDoApp.formatDate(date);
         toDoNode.addEventListener("click", () => {
             //expand toDo and show details
             //TODO: need to change this I believe not sure
@@ -188,12 +188,14 @@ class ToDoUI {
         //add relevant todo state as intial values 
         const dialog = this.#doc.querySelector("dialog");
         const title = dialog.querySelector('input[id="title"]');
-        const priority = dialog.querySelector('input[id="priority"]')
-        const textArea = dialog.querySelector('textarea[id="description"]')
+        const priority = dialog.querySelector('input[id="priority"]');
+        const textArea = dialog.querySelector('textarea[id="description"]');
+        const date = dialog.querySelector(`input[id="date"]`);
         const toDo = this.#toDoApp.getToDo(pid, tid);
         title.value = toDo.title;
         priority.value = toDo.priority;
         textArea.value = toDo.description;
+        date.value = toDo.date;
     }
 
     #confirmCallBack = () => {
@@ -212,9 +214,9 @@ class ToDoUI {
             this.#toDoApp.updatePriority(pid, tid, priority.value);
             this.#toDoApp.updateDate(pid, tid, date.value);
             const toDoButton = this.#doc.querySelector(`button[class="todo-button"][data-tid="${tid}"]`);
-            toDoButton.textContent = title.value;
+            toDoButton.textContent = title.value + " " + this.#toDoApp.formatDate(date.value);
         } else {
-            const toDo = this.#toDoApp.addToDo(pid, title.value, description.value, priority.value);
+            const toDo = this.#toDoApp.addToDo(pid, title.value, description.value, priority.value, date.value);
             this.#addToDo(toDo);
         }
         dialog.close();
