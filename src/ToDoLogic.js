@@ -8,13 +8,13 @@ class ToDo {
     #id;
     #checklist;
 
-    constructor(title, description, priority, id) {
+    constructor(title, description, priority, date = new Date(), id) {
         this.#title = title;
         this.#description = description;
         this.#priority = priority;
+        this.#dueDate = date;
         this.#id = id;
         this.#checklist = new Set();
-        this.#dueDate = new Date();
     }
     getId() {
         return this.#id;
@@ -95,8 +95,8 @@ class Project {
         return this.#toDoList;
     }
 
-    addToDo(title, description, priority) {
-        let newToDo = new ToDo(title, description, priority, this.#counter++);
+    addToDo(title, description, priority, date) {
+        let newToDo = new ToDo(title, description, priority, date, this.#counter++);
         this.#toDoList.push(newToDo)
         return newToDo;
     }
@@ -146,10 +146,10 @@ class ToDoManager {
     getProjects() {
         return this.#projects;
     }
-    addToDo(pid, title, description, priority) {
+    addToDo(pid, title, description, priority, date) {
         const project = this.getProject(pid);
         if (project !== null) {
-            return project.addToDo(title, description, priority);
+            return project.addToDo(title, description, priority, date);
         }
         return null
     }
@@ -158,7 +158,6 @@ class ToDoManager {
         if (project !== null) {
             return project.removeToDo(tid);
         }
-        project.removeToDo(tid);
     }
     getToDo(pid, tid) {
         const project = this.getProject(pid);
@@ -175,7 +174,7 @@ class ToDoManager {
             toDo.updateTitle(title);
         }
     }
-    updatePriortiy(pid, tid, priority) {
+    updatePriority(pid, tid, priority) {
         const toDo = this.getToDo(pid, tid);
         if (toDo !== null) {
             toDo.updatePriority(priority);
@@ -219,8 +218,11 @@ class ToDoApp {
     }
     #toDoUI(toDo) {
         const date = toDo.getDate();
+        //months are zero indexed 
         const month = (date.getMonth() + 1).toString();
         const day = date.getDate().toString();
+        //date values for input[type=date] require the format to be: yyyy-mm-dd
+        //adding neccessary zero padding if required
         return {
             id: toDo.getId(),
             title: toDo.getTitle(),
@@ -244,8 +246,8 @@ class ToDoApp {
         return this.#projectUI(project);
     }
     //Not sure what UI sends here
-    addToDo(pid, title, description, priority) {
-        const toDo = this.#toDoManager.addToDo(pid, title, description, priority);
+    addToDo(pid, title, description, priority, date) {
+        const toDo = this.#toDoManager.addToDo(pid, title, description, priority, date);
         return this.#toDoUI(toDo);
     }
     removeToDo(pid, tid) {
@@ -267,7 +269,7 @@ class ToDoApp {
         return null;
     }
     updatePriority(pid, tid, priority) {
-        this.#toDoManager.updatePriortiy(pid, tid, priority);
+        this.#toDoManager.updatePriority(pid, tid, priority);
     }
     updateTitle(pid, tid, title) {
         this.#toDoManager.updateTitle(pid, tid, title);

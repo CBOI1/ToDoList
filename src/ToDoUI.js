@@ -216,7 +216,7 @@ class ToDoUI {
             const toDoButton = this.#doc.querySelector(`button[class="todo-button"][data-tid="${tid}"]`);
             toDoButton.textContent = title.value + " " + this.#toDoApp.formatDate(date.value);
         } else {
-            const toDo = this.#toDoApp.addToDo(pid, title.value, description.value, priority.value, date.value);
+            const toDo = this.#toDoApp.addToDo(pid, title.value, description.value, priority.value, new Date(date.value));
             this.#addToDo(toDo);
         }
         dialog.close();
